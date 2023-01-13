@@ -1,0 +1,22 @@
+# ignore the following files and directories
+
+# ignore all files in the `workspace` directory
+workspace/
+
+# ignore all files in the `__pycache__` directory
+__pycache__/
+
+# ignore all .log files
+*.log
+
+# ignore all .txt files
+*.txt
+
+# ignore all .env files
+*.env
+
+# ignore all .pyc files
+*.pyc
+
+# ignore the .DS_Store files
+.DS_Store
