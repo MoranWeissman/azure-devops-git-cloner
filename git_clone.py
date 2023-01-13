@@ -1,41 +1,28 @@
-import os
 import git
-from git import transport
+import os
+import logging
 
-# Get the repo URL from the environment variable
-repo_url = os.getenv("REPO_URL", "https://dev.azure.com/AHITL/SW%20Infrastructure/_git/logi-api")
+# setting logging level to debug
+logging.basicConfig(level=logging.DEBUG)
 
-# Get the PAT from the environment variable
-pat = os.getenv("PAT", "apfm22yjz5gpcbgock3yqaisz6mx5acykllhdt7y56hpcu7wy4aa")
+# assign user, password, and repo as variables
+user = "pat"
+password = "ho4tla6r4osly74n6dxg32k4hm2x6kjx6pif4al5vjkp44gil2pq"
+repo = "logi-api"
 
-# Get the branch name from the environment variable
-branch = os.getenv("BRANCH", "main")
+# create the repository url using the variables
+repo_url = f"https://{user}:{password}@dev.azure.com/AHITL/SW%20Infrastructure/_git/{repo}"
 
-# Get the current working directory
-current_dir = os.getcwd() + "/workspace"
+# set local path to a directory named workspace
+local_path = "./workspace/logi-api"
 
-# Check if the directory already exists
-if os.path.exists(current_dir):
-    print("Directory already exists, deleting it")
-    os.rmdir(current_dir)
+# create the workspace directory if it doesn't exist
+if not os.path.exists("./workspace"):
+    os.mkdir("./workspace")
 
-# Create the directory
-os.mkdir(current_dir)
-
-try:
-    git.Repo.clone_from(
-        repo_url,
-        current_dir,
-        branch=branch,
-        env={
-            "GIT_ASKPASS": "echo",
-            "GIT_TERMINAL_PROMPT": "0",
-        },
-        depth=1,
-        progress=True,
-        auth=transport.HTTPBasicAuth("pat", pat),
-    )
-    print("Repository cloned successfully")
-except Exception as e:
-    print(f"Error occured while cloning the repository {e}")
-    exit(1)
+# if the local path does not exist, clone the repository
+# otherwise, skip the clone and log a message
+if not os.path.exists(local_path):
+    git.Repo.clone_from(repo_url, local_path)
+else:
+    logging.info(f"{local_path} already exists, skipping clone.")
