@@ -2,28 +2,37 @@ import git
 import os
 import logging
 
-# assign environment variables
-os.environ["user"] = "pat"
-os.environ["password"]
-os.environ["repo"]
-os.environ["branch"]
+# Get the values of the environment variables, or use the default values
+user = os.environ.get("user", "pat")
+organization = os.environ.get("organization", "AHITL")
+password = os.environ.get("password")
+repository = os.environ.get("repository")
+branch = os.environ.get("branch")
+project = os.environ.get("project")
 
-# set variables
-local_path = f"./workspace/{os.environ['repo']}"
+# Check if the required environment variables are set
+if not all(var in os.environ for var in ['password', 'repository', 'branch', 'project']):
+    raise ValueError("Missing required environment variables")
 
-# setting logging level to debug
-logging.basicConfig(level=logging.DEBUG)
+# Set local path variable
+local_path = f"./workspace/{repository}"
 
-# create the repository url using the variables
-repo_url = f"https://{os.environ['user']}:{os.environ['password']}@dev.azure.com/AHITL/SW%20Infrastructure/_git/{os.environ['repo']}"
+# Configure logging settings
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Create the repository URL using the variables
+repo_url = f"https://{user}:{password}@dev.azure.com/{organization}/{project}/_git/{repository}"
+logging.debug(f"Repository URL: {repo_url}")
 
 # create the workspace directory if it doesn't exist
 if not os.path.exists("./workspace"):
     os.mkdir("./workspace")
+    logging.debug("Workspace directory created")
 
 # if the local path does not exist, clone the repository
 # otherwise, skip the clone and log a message
 if not os.path.exists(local_path):
-    git.Repo.clone_from(repo_url, local_path, branch=f"{os.environ['branch']}")
+    git.Repo.clone_from(repo_url, local_path, branch=branch)
+    logging.debug(f"Repository cloned to {local_path}")
 else:
     logging.info(f"{local_path} already exists, skipping clone.")
