@@ -1,0 +1,100 @@
+trigger:
+- main
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: azure-pipeline-templates
+
+variables:
+  # The pipeline uses a variable group for AWS ECR credentials
+  - group: devops-account-ecr-credentials
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+
+jobs:
+  - job: buildDockerImage
+    displayName: 'Build Azure DevOps Git Cloner Tool'
+
+    steps:          
+      - task: EnvironmentVariables@0
+
+      - checkout: self
+        persistCredentials: true      
+        fetchDepth: 1      
+
+      # Login to AWS
+      - script: |
+          aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+        displayName: 'Login to AWS'
+        env:
+          AWS_ACCESS_KEY_ID: $(accessKey)
+          AWS_SECRET_ACCESS_KEY: $(secretAccessKey)      
+
+      # Bump the patch version number if the build was triggered by an individual commit
+      - script: |
+          #!/bin/bash 
+          set -ex
+          
+          if [ "$BUILD_REASON" = "IndividualCI" ]; then
+            # Set patch version and push commit
+            git config --global user.email "you@example.com"
+            git config --global user.name "Azure DevOps"
+          
+            # Extract the current version number
+            version=$(sed -n "s/version='\(.*\)'/\1/p" VERSION)            
+            pip install bump2version && \
+            bump2version --no-commit --current-version $version patch VERSION    
+
+            # Extract the new version number
+            version=$(sed -n "s/version='\(.*\)'/\1/p" VERSION)                                  
+            git commit -am "Version upgraded to $version [skip ci]"
+          else
+            version="$BUILD_SOURCEBRANCHNAME-$(sed -n "s/version='\(.*\)'/\1/p" VERSION)"
+          fi                      
+          
+          # Output the version number to the Helm job          
+          echo "##vso[task.setvariable variable=ver]$version"        
+        displayName: 'Bump patch version number'       
+        condition: succeeded()               
+        name: bumpPatchVersion          
+        continueOnError: false           
+
+      # Build the Docker image
+      - script: |
+          #!/bin/bash 
+          set -e
+                      
+          docker build -t $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$BUILD_REPOSITORY_NAME:"$(ver)" .            
+        displayName: 'Build Docker image'
+        condition: succeeded()
+        continueOnError: false          
+
+      - script: |
+          #!/bin/bash
+          set -e
+
+          docker push $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$BUILD_REPOSITORY_NAME:"$(ver)"            
+        displayName: 'Docker push'
+        condition: succeeded()                
+        env:
+          AWS_SECRET_ACCESS_KEY: $(secret_access_key)
+          AWS_ACCESS_KEY_ID: $(access_key_id)
+          AWS_REGION: $(aws_region)                
+
+      - script: |          
+          git push origin HEAD:main -f
+        displayName: 'Push version commit to main branch'
+        condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
+
+      - script: |
+          #!/bin/bash 
+          set -e
+
+          NAME="$(ver)"
+          echo '##vso[build.updatebuildnumber]'$NAME
+        displayName: 'Update Build Name'
+        condition: succeeded()        
