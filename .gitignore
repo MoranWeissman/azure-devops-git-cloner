@@ -9,9 +9,6 @@ __pycache__/
 # ignore all .log files
 *.log
 
-# ignore all .txt files
-*.txt
-
 # ignore all .env files
 *.env
 
