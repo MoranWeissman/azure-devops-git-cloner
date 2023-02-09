@@ -2,33 +2,41 @@
 A simple tool that clones a Git repository from Azure DevOps to the current working directory
 <br>
 <br>
-## Git Clone Script
-This script is used to clone a git repository. It is designed to work with Azure DevOps and GitHub.
-<br>
-<br>
+# Git Clone Utility
+
+This code provides a simple utility to clone a Git repository. It uses the GitPython library to perform the cloning. The required information, such as the repository URL, user, password, and other details, are passed as environment variables. The code sets default values for these variables if they are not set.
+
+## Features
+
+- Clones the repository to the specified local path, or skips the cloning if the local path already exists.
+- Replaces spaces in the project variable with `%20`.
+- Logs debug and error messages for easier debugging.
+
 ## Usage
-Before running the code, make sure you have the following environment variables set:
 
-* `password`: the password for the Azure DevOps account
-* `repository`: the name of the repository you want to clone
-* `branch`: the branch of the repository you want to clone
-* `project`: the name of the project that the repository belongs to
+1. Set the required environment variables. These include `user`, `password`, `repository`, `branch`, and `project`.
+2. Run the code.
+3. Check the logs for messages and debugging information.
 
-You can also set the following optional environment variables:
+## Environment Variables
 
-* `user`: the username for the Azure DevOps account (default is "pat")
-* `organization`: the name of the organization that the project belongs to (default is "AHITL")
+| Variable Name | Required | Default Value | Description |
+| --- | --- | --- | --- |
+| `user` | No | `pat` | The username to use when cloning the repository. |
+| `organization` | No | `AHITL` | The organization name to use when cloning the repository. |
+| `password` | Yes | N/A | The password to use when cloning the repository. |
+| `repository` | Yes | N/A | The name of the repository to clone. |
+| `branch` | Yes | N/A | The name of the branch to clone. |
+| `project` | Yes | N/A | The name of the project to clone. |
 
-The script will clone the repository to a directory called workspace in the current working directory. If the workspace directory does not exist, it will be created. If the repository has already been cloned to the specified local path, the script will skip the clone and log a message.
-<br>
-<br>
-## How to run
-The script is intended to be run with python.
-```
-python git_clone.py
-```
-<br>
-<br>
+## Requirements
+
+- Python 3.x
+- GitPython library
+
+## License
+
+This code is released under the MIT License.
 
 ## CI/CD pipeline
 <br>
