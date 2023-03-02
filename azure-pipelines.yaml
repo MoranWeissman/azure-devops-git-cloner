@@ -9,7 +9,7 @@ resources:
 
 variables:
   # The pipeline uses a variable group for AWS ECR credentials
-  - group: devops-account-ecr-credentials
+  - group: aws-ecr-credentials
 
 pool:
   vmImage: 'ubuntu-latest'

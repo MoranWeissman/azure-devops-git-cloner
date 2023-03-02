@@ -5,7 +5,7 @@ ENV user=pat
 ENV password=""
 ENV repository=""
 ENV branch=""
-ENV organization="AHITL"
+ENV organization=""
 ENV project=""
 
 # create workspace directory
