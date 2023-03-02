@@ -20,8 +20,6 @@ jobs:
     displayName: 'Build Azure DevOps Git Cloner Tool'
 
     steps:          
-      - task: EnvironmentVariables@0
-
       - checkout: self
         persistCredentials: true      
         fetchDepth: 1      
